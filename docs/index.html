@@ -121,10 +121,25 @@
         <section data-page="poptavky" hidden>
           <header class="heading">
             <h1>Poptávky servisu</h1>
-            <p>Testovací poptávky vytvořené v tomto prohlížeči.</p>
+            <p>Stav poptávek a potvrzení o převzetí servisem.</p>
           </header>
           <div id="confirmation" class="notice" role="status" hidden></div>
+          <div id="role-links" class="role-links" hidden>
+            <a id="service-link" class="button primary" target="_blank" rel="noopener noreferrer"
+              >Otevřít pohled servisu</a
+            ><a id="customer-link" class="button" target="_blank" rel="noopener noreferrer"
+              >Otevřít potvrzení zákazníka</a
+            >
+          </div>
           <div class="list-card" id="orders"></div>
+          <div class="actions">
+            <button type="button" id="refresh">Obnovit stav</button
+            ><span id="sync" role="status" class="muted"></span>
+          </div>
+          <details id="legacy" hidden>
+            <summary>Dřívější lokální poptávky</summary>
+            <div class="list-card" id="legacy-orders"></div>
+          </details>
           <a class="button below" href="#kalkulacka">Nová kalkulace</a>
         </section>
         <section data-page="seo" hidden>

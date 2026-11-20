@@ -1,3 +1,5 @@
+import { workspace, grantURL, submitRemote } from './service-api.js';
+import { connectInbox } from './inbox.js';
 import { one, element, money, resource, remember, remembered } from './common.js';
 const prefix = 'aardvarkland.web-audit.order.v1.';
 const contacts = ['Kontakt Alfa', 'Kontakt Beta'];
@@ -61,8 +63,8 @@ function validRecord(r) {
     Number.isFinite(Date.parse(r.at))
   );
 }
-export function listOrders() {
-  const box = one('#orders');
+function legacyOrders() {
+  const box = one('#legacy-orders');
   try {
     const rows = [];
     for (const key of Object.keys(localStorage).filter((k) => k.startsWith(prefix))) {
@@ -75,10 +77,7 @@ export function listOrders() {
       if (validRecord(r) && key === prefix + r.id) rows.push(r);
     }
     box.replaceChildren();
-    if (!rows.length)
-      box.append(
-        element('p', 'Zatím tu nejsou žádné poptávky. První vytvoříte v kalkulačce.', 'empty'),
-      );
+    one('#legacy').hidden = !rows.length;
     for (const r of rows.sort((a, b) => b.at.localeCompare(a.at))) {
       const n = element('article', undefined, 'order-row'),
         body = element('div');
@@ -95,6 +94,45 @@ export function listOrders() {
     }
   } catch {
     box.replaceChildren(element('p', 'Seznam vyžaduje povolené úložiště prohlížeče.', 'empty'));
+  }
+}
+let generation = 0,
+  disconnect;
+export function leaveOrders() {
+  generation++;
+  disconnect?.();
+  disconnect = null;
+}
+export async function listOrders() {
+  leaveOrders();
+  const current = generation;
+  legacyOrders();
+  const buttons = one('#role-links'),
+    status = one('#sync'),
+    box = one('#orders'),
+    refresh = one('#refresh');
+  buttons.hidden = true;
+  refresh.disabled = true;
+  status.textContent = 'Načítání ze serveru…';
+  try {
+    const space = await workspace();
+    if (current !== generation) return;
+    one('#service-link').href = grantURL(space, 'service');
+    one('#customer-link').href = grantURL(space, 'customer');
+    buttons.hidden = false;
+    disconnect = connectInbox({
+      grant: { id: space.id, key: space.customer },
+      role: 'customer',
+      status,
+      box,
+      refresh,
+    });
+  } catch (e) {
+    if (current !== generation) return;
+    box.replaceChildren();
+    status.textContent = e.message;
+    refresh.disabled = false;
+    refresh.onclick = listOrders;
   }
 }
 export async function setupOrders() {
@@ -125,35 +163,62 @@ export async function setupOrders() {
     closeRequest();
     one('#prepare').focus();
   });
-  one('#request-form').addEventListener('submit', (e) => {
+  let sending = false;
+  one('#request-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!pending) return;
-    const order = {
-      ...pending,
+    if (!pending || sending) return;
+    const form = e.currentTarget;
+    const payload = {
+      id: pending.id,
+      count: pending.count,
+      area: pending.area,
       contact: one('#contact').value,
       slot: one('#slot').value,
-      at: new Date().toISOString(),
     };
-    if (!validRecord(order)) return;
-    const notification = one('#confirmation');
+    sending = true;
+    const controls = [...form.elements, ...one('#calc-form').elements];
+    controls.forEach((control) => {
+      control.disabled = true;
+    });
+    const send = form.querySelector('button[type=submit]');
+    const label = send.textContent;
+    send.textContent = 'Ukládání…';
     try {
-      localStorage.setItem(prefix + order.id, JSON.stringify(order));
-    } catch {
-      const err = one('#app-error');
-      err.textContent = 'Poptávku se nepodařilo uložit. Povolte úložiště a zkuste to znovu.';
-      err.hidden = false;
-      return;
+      const space = await workspace();
+      let previous;
+      try {
+        previous = JSON.parse(remembered('sending'));
+      } catch {}
+      const signature = [space.id, payload.count, payload.area, payload.contact, payload.slot].join(
+        '|',
+      );
+      if (previous?.signature === signature) payload.id = previous.id;
+      else if (pending.signature && pending.signature !== signature)
+        payload.id = crypto.randomUUID();
+      pending.signature = signature;
+      pending.id = payload.id;
+      remember('sending', JSON.stringify({ signature, id: payload.id }));
+      const { order } = await submitRemote(space, payload);
+      remember('sending', '');
+      closeRequest();
+      form.reset();
+      one('#app-error').hidden = true;
+      const notification = one('#confirmation');
+      notification.hidden = false;
+      notification.textContent =
+        'Poptávka ' + order.id.slice(0, 8).toUpperCase() + ' je uložená na serveru.';
+      location.hash = 'poptavky';
+    } catch (e) {
+      const error = one('#app-error');
+      error.textContent = e.message;
+      error.hidden = false;
+    } finally {
+      sending = false;
+      controls.forEach((control) => {
+        control.disabled = false;
+      });
+      send.textContent = label;
     }
-    closeRequest();
-    e.target.reset();
-    one('#app-error').hidden = true;
-    notification.hidden = false;
-    notification.textContent =
-      'Poptávka ' + order.id.slice(0, 8).toUpperCase() + ' je uložená v tomto prohlížeči.';
-    location.hash = 'poptavky';
-  });
-  window.addEventListener('storage', (e) => {
-    if (!e.key || e.key.startsWith(prefix)) listOrders();
   });
   recalculate();
   one('#prepare').disabled = false;

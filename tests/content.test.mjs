@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
+import { checkCostAnswer } from '../docs/assets/geo.js';
 const read = (p) => readFile(new URL('../' + p, import.meta.url), 'utf8');
 const report = JSON.parse(await read('docs/assets/geo-report.json'));
 const data = JSON.parse(await read('docs/assets/catalog.json'));
@@ -49,4 +50,15 @@ test('Published and baseline price links have their intended targets', async () 
   assert.match(await read('docs/servis/index.html'), /data-price-link href="cenik\/#cena"/);
   assert.doesNotMatch(await read('docs/archiv/cenik/index.html'), /id="ceny"/);
   assert.match(await read('docs/servis/cenik/index.html'), /id="cena"/);
+});
+test('The displayed total requires the current catalogue price and both verified passages', () => {
+  const recorded = report.cases.find((c) => c.id === 'cena').after;
+  const ids = new Set(recorded.citations);
+  assert.deepEqual(checkCostAnswer(recorded, data, ids), { expected: 3600, matches: true });
+  assert.equal(checkCostAnswer(recorded, data, new Set(['cena'])).matches, false);
+  assert.equal(checkCostAnswer(recorded, { ...data, unitPrice: 1500 }, ids).matches, false);
+  for (const answer of ['3 600,50 Kč', '3 600 Kč nebo 4 600 Kč', '−3600 Kč', 'Cena chybí.']) {
+    assert.equal(checkCostAnswer({ answer }, data, ids).matches, false);
+  }
+  assert.equal(checkCostAnswer({ answer: '3\u202f600,00 Kč.' }, data, ids).matches, true);
 });

@@ -1,5 +1,5 @@
 import { icons, one, titles } from './common.js';
-import { setupOrders, listOrders } from './orders.js';
+import { setupOrders, listOrders, leaveOrders } from './orders.js';
 import { setupSeo, loadPerformance, restoreSeo } from './seo.js';
 import { setupGeo } from './geo.js';
 let active;
@@ -36,7 +36,10 @@ function route(moveFocus = false) {
   document.title = titles[active] + ' · Aardvarkland Web Audit';
   if (active === 'kalkulacka') loadOnce('orders', setupOrders, active);
   if (active === 'poptavky') listOrders();
-  else one('#confirmation').hidden = true;
+  else {
+    leaveOrders();
+    one('#confirmation').hidden = true;
+  }
   if (active === 'geo') loadOnce('geo', setupGeo, active);
   if (active === 'seo') {
     restoreSeo();

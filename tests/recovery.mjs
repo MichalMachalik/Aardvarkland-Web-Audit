@@ -41,6 +41,16 @@ try {
     Storage.prototype.setItem = window.originalWrite;
     localStorage.setItem('aardvarkland.web-audit.order.v1.invalid', '{');
   });
+  const orderEndpoint = '**/v1/workspaces/*/orders';
+  await p.route(orderEndpoint, async (route) => {
+    if (route.request().method() !== 'POST') return route.continue();
+    const saved = await route.fetch();
+    assert.equal(saved.status(), 200);
+    await route.abort();
+  });
+  await p.locator('#request-form button[type=submit]').click();
+  await p.getByText('Server se nepodařilo kontaktovat.', { exact: false }).waitFor();
+  await p.unroute(orderEndpoint);
   await p.locator('#request-form button[type=submit]').click();
   await p.locator('.order-row').waitFor();
   assert.equal(await p.locator('.order-row').count(), 1);

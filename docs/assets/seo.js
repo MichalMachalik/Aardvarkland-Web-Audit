@@ -7,28 +7,28 @@ export async function audit(repaired) {
   const pricing = new URL('cenik/', base);
   const [home, price] = await Promise.all([loadPage(base), loadPage(pricing)]);
   const pages = [home, price];
-  const label = home.querySelector('a[data-price-link]');
+  const label = home.querySelector('a[data-price-link][href]');
   if (repaired && label) {
-    const corrected = new URL(label.getAttribute('href'), base);
-    corrected.hash = 'cena';
-    label.setAttribute('href', corrected.href);
+    label.setAttribute('href', 'cenik/#cena');
   }
   const target = label && new URL(label.getAttribute('href'), base);
+  const priceHeading = price.getElementById('cena')?.querySelector('h2')?.textContent.trim();
   const works =
-    target?.pathname === pricing.pathname &&
-    !!target.hash &&
-    !!price.getElementById(target.hash.slice(1));
+    target?.origin === pricing.origin &&
+    target.pathname === pricing.pathname &&
+    target.hash === '#cena' &&
+    !!priceHeading;
   const titles = pages.map((p) => p.title.trim());
   const descriptions = pages.map((p) => p.querySelector('meta[name=description]')?.content.trim());
-  return [
+  const checks = [
     {
       name: 'Odkaz na cenu servisu',
       ok: works,
       detail: works
-        ? 'Odkaz v pracovní kopii vede přímo na oddíl „Cena za jednotku“.'
-        : 'Odkaz míří na #ceny. V ceníku má oddíl „Cena za jednotku“ identifikátor #cena.',
+        ? 'Odkaz vede přímo na oddíl „' + priceHeading + '“.'
+        : 'Cílem odkazu má být oddíl #cena na stránce ceníku.',
       evidence: target && target.pathname.split('/').slice(-3).join('/') + target.hash,
-      url: target?.href,
+      url: target?.origin === pricing.origin ? target.href : undefined,
     },
     {
       name: 'Samostatné titulky stránek',
@@ -48,6 +48,38 @@ export async function audit(repaired) {
       detail: pages.map((p) => p.querySelector('h1')?.textContent || 'Chybí nadpis').join(' / '),
     },
   ];
+  const pageEvidence = pages.map((page, i) => ({
+    name: i === 0 ? 'Servisní web' : 'Ceník servisu',
+    url: i === 0 ? base.href : pricing.href,
+    title: titles[i],
+    description: descriptions[i],
+    robots: page.querySelector('meta[name="robots"]')?.content || '',
+  }));
+  return { checks, pageEvidence };
+}
+
+function renderSearchPreview(pages) {
+  const details = element('details', undefined, 'below');
+  details.append(element('summary', 'Náhled titulků a popisů z HTML'));
+  for (const page of pages) {
+    const section = element('section', undefined, 'source-section');
+    section.append(
+      element('small', page.name, 'meta'),
+      element('h3', page.title || 'Titulek chybí'),
+      element('p', page.description || 'Popis chybí'),
+      link('Otevřít stránku', page.url),
+    );
+    if (
+      page.robots
+        .toLowerCase()
+        .split(/[\s,]+/)
+        .includes('noindex')
+    ) {
+      section.append(element('p', 'Stránka má pro vyhledávače nastaveno noindex.', 'meta'));
+    }
+    details.append(section);
+  }
+  return details;
 }
 let busy = false,
   version = 'archiv';
@@ -59,7 +91,7 @@ async function run(next) {
   const status = one('#seo-status');
   status.textContent = 'Kontroluji obě stránky…';
   try {
-    const checks = await audit(next === 'servis');
+    const { checks, pageEvidence } = await audit(next === 'servis');
     version = next;
     const fixed = version === 'servis';
     remember('audit', version);
@@ -92,6 +124,7 @@ async function run(next) {
       }
       box.append(item);
     }
+    box.append(renderSearchPreview(pageEvidence));
     one('#repair-actions').hidden = false;
     one('#repair').hidden = fixed;
     one('#undo-repair').hidden = !fixed;

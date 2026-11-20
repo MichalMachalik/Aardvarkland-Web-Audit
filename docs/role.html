@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <link rel="stylesheet" href="assets/style.css" />
+    <link rel="icon" href="assets/aardvarkland.png" />
+    <title>Poptávky · Aardvarkland Web Audit</title>
+  </head>
+  <body>
+    <header class="site-head">
+      <a class="role-brand" href="./"
+        ><img src="assets/aardvarkland.png" width="30" height="30" alt="" /> Aardvarkland Web
+        Audit</a
+      ><span>Větrovka servis</span>
+    </header>
+    <main class="client-main">
+      <header class="heading">
+        <h1 id="role-title">Poptávky</h1>
+        <p id="role-intro"></p>
+      </header>
+      <div class="list-card" id="orders"></div>
+      <div class="actions">
+        <button id="refresh" type="button" hidden>Obnovit stav</button
+        ><span id="sync" role="status" class="muted"></span>
+      </div>
+    </main>
+    <script type="module" src="assets/role.js"></script>
+  </body>
+</html>

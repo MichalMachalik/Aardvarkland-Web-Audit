@@ -1,0 +1,10 @@
+{
+  "name": "aardvarkland-web-audit-api",
+  "main": "server/worker.js",
+  "compatibility_date": "2026-01-15",
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": {"enabled": false},
+  "triggers": {"crons": ["23 3 * * *"]},
+  "d1_databases": [{"binding":"DB","database_name":"aardvarkland-web-audit-orders","database_id":"00000000-0000-0000-0000-000000000001"}]
+}
