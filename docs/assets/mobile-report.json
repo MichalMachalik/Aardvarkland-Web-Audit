@@ -1,0 +1,18 @@
+{
+  "date": "2026-11-20T02:50:51.249Z",
+  "page": "servis/",
+  "lighthouseVersion": "13.6.0",
+  "platform": "mobile",
+  "throttling": "simulate",
+  "metrics": {
+    "Výkon": "99/100",
+    "Přístupnost": "100/100",
+    "LCP": "2,13 s",
+    "CLS": "0,0001"
+  },
+  "measurements": {
+    "largestContentfulPaintMs": 2132.5066500000003,
+    "cumulativeLayoutShift": 0.00005995494553012033
+  },
+  "source": "Jedno laboratorní měření místní kopie servisního webu s mobilním profilem."
+}

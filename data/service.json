@@ -1,0 +1,15 @@
+{
+  "unitPrice": 1200,
+  "maxUnits": 20,
+  "areas": {
+    "4": 400,
+    "5": 250,
+    "6": 0
+  },
+  "scope": "Servis zahrnuje čištění filtrů, kontrolu odvodu kondenzátu a zkoušku chlazení.",
+  "before": {
+    "cena": "Cena servisu se odvíjí od počtu nástěnných jednotek.",
+    "doprava": "Servis zajišťujeme v Praze.",
+    "rozsah": "Při servisu kontrolujeme provoz klimatizace."
+  }
+}

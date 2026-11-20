@@ -1,0 +1,76 @@
+{
+  "model": "Qwen3-4B-Instruct-2507-Q4_K_M",
+  "modelSha256": "3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597",
+  "engine": "llama.cpp b12556",
+  "modelFile": "https://huggingface.co/unsloth/Qwen3-4B-Instruct-2507-GGUF/resolve/a06e946bb6b655725eafa393f4a9745d460374c9/Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+  "recordedAt": "2026-11-20T02:48:12+00:00",
+  "instruction": "Jsi český redaktor. Odpověz česky jednou až dvěma stručnými větami na otázku zákazníka výhradně podle dodaných pasáží. Při dotazu na celkovou cenu ji spočítej, pokud jsou uvedeny všechny částky. Uveď celkovou cenu jen jednou. Když odpověď nelze zjistit, použij jedinou větu začínající slovy „Web neuvádí“, pojmenuj chybějící údaj a vynech okolní detaily. Absence údaje neznamená, že služba není k dispozici. Vrať JSON s poli answer (text bez značek citací) a citations (seznam ID těch pasáží, z nichž vychází konkrétní sdělené údaje). Jestliže pouze říkáš, že informace chybí, nech seznam citací prázdný. Cituj pouze relevantní pasáže.",
+  "sampling": {
+    "temperature": 0,
+    "seed": 42,
+    "max_tokens": 300
+  },
+  "sources": {
+    "before": {
+      "cena": "Cena servisu se odvíjí od počtu nástěnných jednotek.",
+      "doprava": "Servis zajišťujeme v Praze.",
+      "rozsah": "Při servisu kontrolujeme provoz klimatizace."
+    },
+    "after": {
+      "cena": "Servis jedné nástěnné jednotky stojí 1 200 Kč včetně DPH. Cena se násobí počtem jednotek.",
+      "doprava": "Doprava za jednu návštěvu stojí 0 Kč pro Prahu 6, 250 Kč pro Prahu 5 a 400 Kč pro Prahu 4.",
+      "rozsah": "Servis zahrnuje čištění filtrů, kontrolu odvodu kondenzátu a zkoušku chlazení."
+    }
+  },
+  "cases": [
+    {
+      "id": "cena",
+      "question": "Kolik zaplatím za servis tří nástěnných jednotek na Praze 6 včetně dopravy?",
+      "before": {
+        "answer": "Web neuvádí celkovou cenu servisu za tři nástěnné jednotky, protože cena závisí na počtu jednotek a konkrétní cena není uvedena.",
+        "citations": [],
+        "raw": "{\"answer\": \"Web neuvádí celkovou cenu servisu za tři nástěnné jednotky, protože cena závisí na počtu jednotek a konkrétní cena není uvedena.\", \"citations\": []}"
+      },
+      "after": {
+        "answer": "Za servis tří nástěnných jednotek na Praze 6 zaplatíte 3 600 Kč včetně dopravy.",
+        "citations": [
+          "cena",
+          "doprava"
+        ],
+        "raw": "{\"answer\": \"Za servis tří nástěnných jednotek na Praze 6 zaplatíte 3 600 Kč včetně dopravy.\", \"citations\": [\"cena\", \"doprava\"]}"
+      }
+    },
+    {
+      "id": "rozsah",
+      "question": "Jaké práce servis klimatizace zahrnuje?",
+      "before": {
+        "answer": "Servis klimatizace zahrnuje kontrolu provozu klimatizace.",
+        "citations": [
+          "rozsah"
+        ],
+        "raw": "{ \"answer\": \"Servis klimatizace zahrnuje kontrolu provozu klimatizace.\", \"citations\": [\"rozsah\"] }"
+      },
+      "after": {
+        "answer": "Servis zahrnuje čištění filtrů, kontrolu odvodu kondenzátu a zkoušku chlazení.",
+        "citations": [
+          "rozsah"
+        ],
+        "raw": "{\"answer\": \"Servis zahrnuje čištění filtrů, kontrolu odvodu kondenzátu a zkoušku chlazení.\", \"citations\": [\"rozsah\"]}"
+      }
+    },
+    {
+      "id": "vikend",
+      "question": "Přijedete na servis také v sobotu?",
+      "before": {
+        "answer": "Web neuvádí, zda služba probíhá v sobotu.",
+        "citations": [],
+        "raw": "{\"answer\": \"Web neuvádí, zda služba probíhá v sobotu.\", \"citations\": []}"
+      },
+      "after": {
+        "answer": "Web neuvádí, zda přijedou na servis v sobotu.",
+        "citations": [],
+        "raw": "{\"answer\": \"Web neuvádí, zda přijedou na servis v sobotu.\", \"citations\": []}"
+      }
+    }
+  ]
+}
