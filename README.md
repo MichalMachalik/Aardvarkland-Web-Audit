@@ -13,9 +13,9 @@
 
 ## Převzetí poptávky
 
-V kalkulačce vyberte místo, počet jednotek a jeden z fiktivních kontaktů. Po odeslání otevřete **Pohled servisu**, převezměte poptávku a v **Potvrzení zákazníka** ověřte stav a čas převzetí. Oba odkazy fungují i v samostatných prohlížečích. Zákaznický pohled má přístup ke čtení, servisní odkaz dovoluje převzetí.
+V kalkulačce vyberte místo, počet jednotek pro jednu návštěvu, fiktivní kontakt a preferovanou denní dobu. Po odeslání zvolte **Otevřít pohled servisu** a převezměte poptávku. Přes **Otevřít stav vašich poptávek** zákazník uvidí stav a čas převzetí. Oba odkazy fungují i v samostatných prohlížečích. Zákaznický pohled má přístup ke čtení, servisní odkaz dovoluje převzetí.
 
-Pracovní prostor má platnost sedm dní a pojme 40 poptávek. Server přijímá pouze předdefinované kontakty a časy. U opakovaného odeslání vrací stejný záznam. Převzetí uchovává první čas potvrzení. Po skončení platnosti denní úloha odstraní prostor i poptávky. Prohlížeč uchovává přístupové údaje k dané ukázce. Dřívější lokální záznamy jsou v samostatném archivu.
+Přístup k ukázce platí sedm dní od vytvoření pracovního prostoru a je společný pro všechny jeho poptávky. Do prostoru lze uložit až 40 poptávek. Server přijímá pouze předdefinované kontakty a časy. U opakovaného odeslání vrací stejný záznam. Převzetí uchovává první čas potvrzení. Po skončení platnosti denní úloha odstraní prostor i poptávky. Prohlížeč uchovává přístupové údaje k dané ukázce. Dřívější lokální záznamy jsou v samostatném archivu.
 
 ## Data a měření
 

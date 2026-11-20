@@ -1,4 +1,4 @@
-import { element, money } from './common.js';
+import { element, money, visitSummary } from './common.js';
 import { listRemote, acceptRemote } from './service-api.js';
 function date(value) {
   return new Intl.DateTimeFormat('cs-CZ', {
@@ -13,7 +13,7 @@ function row(order, onAccept) {
     meta = element('div', undefined, 'order-meta');
   body.append(
     element('strong', order.contact + ' · Praha ' + order.area),
-    element('small', order.count + ' × servis · ' + order.slot + ' · ' + money(order.total)),
+    element('small', visitSummary(order.count, order.slot) + ' · ' + money(order.total)),
     element(
       'small',
       'Poptávka ' + order.id.slice(0, 8).toUpperCase() + ' · Odesláno ' + date(order.at),
@@ -79,11 +79,16 @@ export function connectInbox({ grant, box, status, refresh, role }) {
         (changed ? 'Servis potvrdil převzetí. ' : '') +
         'Aktualizováno ' +
         date(Date.now()) +
-        ' · Platnost do ' +
+        ' · Přístup k ukázce do ' +
         date(result.expires);
       if (status.textContent !== message) status.textContent = message;
     } catch (e) {
-      if (alive) status.textContent = e.message;
+      if (!alive) return;
+      status.textContent = e.status === 410 ? 'Přístup k této ukázce vypršel.' : e.message;
+      if (e.status === 410 || e.status === 403) {
+        box.replaceChildren();
+        disconnect();
+      }
     } finally {
       busy = false;
       if (alive) {
@@ -114,15 +119,16 @@ export function connectInbox({ grant, box, status, refresh, role }) {
     if (!document.hidden) update();
     else clearTimeout(timer);
   }
-  refresh.onclick = update;
-  document.addEventListener('visibilitychange', visibility);
-  window.addEventListener('focus', update);
-  update();
-  return () => {
+  function disconnect() {
     alive = false;
     clearTimeout(timer);
     refresh.onclick = null;
     document.removeEventListener('visibilitychange', visibility);
     window.removeEventListener('focus', update);
-  };
+  }
+  refresh.onclick = update;
+  document.addEventListener('visibilitychange', visibility);
+  window.addEventListener('focus', update);
+  update();
+  return disconnect;
 }

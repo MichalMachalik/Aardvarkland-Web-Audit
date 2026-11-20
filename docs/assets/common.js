@@ -5,6 +5,12 @@ export const money = (value) =>
     currency: 'CZK',
     maximumFractionDigits: 0,
   }).format(value);
+const unitForms = { one: 'jednotka', few: 'jednotky', other: 'jednotek' };
+const plural = new Intl.PluralRules('cs-CZ');
+export function visitSummary(count, slot) {
+  const visit = count + ' ' + unitForms[plural.select(count)] + ' · 1 návštěva';
+  return slot ? visit + ' · Preferovaný čas ' + slot.toLocaleLowerCase('cs-CZ') : visit;
+}
 export const titles = {
   prehled: 'Přehled',
   kalkulacka: 'Kalkulačka',

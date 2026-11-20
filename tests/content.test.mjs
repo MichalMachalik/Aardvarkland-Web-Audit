@@ -1,10 +1,18 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
+import { visitSummary } from '../docs/assets/common.js';
 import { checkCostAnswer } from '../docs/assets/geo.js';
 const read = (p) => readFile(new URL('../' + p, import.meta.url), 'utf8');
 const report = JSON.parse(await read('docs/assets/geo-report.json'));
 const data = JSON.parse(await read('docs/assets/catalog.json'));
+test('One visit covers the selected units and the time is only a preference', () => {
+  for (let count = 1; count <= data.maxUnits; count++) {
+    const noun = count === 1 ? 'jednotka' : count <= 4 ? 'jednotky' : 'jednotek';
+    assert.equal(visitSummary(count), count + ' ' + noun + ' · 1 návštěva');
+  }
+  assert.equal(visitSummary(2, 'Dopoledne'), '2 jednotky · 1 návštěva · Preferovaný čas dopoledne');
+});
 test('The calculator uses the source catalogue', async () => {
   const source = JSON.parse(await read('data/service.json'));
   assert.deepEqual(data, {

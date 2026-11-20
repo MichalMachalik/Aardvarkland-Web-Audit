@@ -1,6 +1,6 @@
 import { workspace, grantURL, submitRemote } from './service-api.js';
 import { connectInbox } from './inbox.js';
-import { one, element, money, resource, remember, remembered } from './common.js';
+import { one, element, money, resource, remember, remembered, visitSummary } from './common.js';
 const prefix = 'aardvarkland.web-audit.order.v1.';
 const contacts = ['Kontakt Alfa', 'Kontakt Beta'];
 const slots = ['Dopoledne', 'Odpoledne'];
@@ -85,7 +85,7 @@ function legacyOrders() {
         element('strong', r.contact + ' · Praha ' + r.area),
         element(
           'small',
-          r.count + ' × servis · ' + r.slot + ' · ' + new Date(r.at).toLocaleString('cs-CZ'),
+          visitSummary(r.count, r.slot) + ' · ' + new Date(r.at).toLocaleString('cs-CZ'),
         ),
         element('small', 'Poptávka ' + r.id.slice(0, 8).toUpperCase()),
       );
@@ -156,7 +156,7 @@ export async function setupOrders() {
     if (!pending) pending = { ...q, id: crypto.randomUUID() };
     one('#request-form').hidden = false;
     one('#request-quote').textContent =
-      q.count + ' × servis · Praha ' + q.area + ' · ' + money(q.total) + ' včetně DPH';
+      visitSummary(q.count) + ' · Praha ' + q.area + ' · ' + money(q.total) + ' včetně DPH';
     one('#contact').focus();
   });
   one('#cancel').addEventListener('click', () => {

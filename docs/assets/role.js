@@ -14,11 +14,11 @@ function open() {
     return;
   }
   const service = grant.role === 'service';
-  one('#role-title').textContent = service ? 'Převzetí servisem' : 'Potvrzení zákazníka';
+  one('#role-title').textContent = service ? 'Převzetí servisem' : 'Stav vašich poptávek';
   document.title = one('#role-title').textContent + ' · Web Audit';
   one('#role-intro').textContent = service
-    ? 'Převezměte poptávku. Zákazník uvidí čas potvrzení.'
-    : 'Po převzetí servisem se zde automaticky zobrazí potvrzení.';
+    ? 'Po převzetí poptávky zákazník uvidí, kdy jste ji převzali.'
+    : 'Jakmile servis převezme poptávku, uvidíte zde čas převzetí.';
   stop = connectInbox({
     grant,
     box: one('#orders'),
