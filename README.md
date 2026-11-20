@@ -25,7 +25,9 @@ Přístup k ukázce platí sedm dní od vytvoření pracovního prostoru a je sp
 
 ## Spuštění a testy
 
-Vyžaduje Node.js 22 nebo novější. Python 3 slouží k místnímu spuštění HTTP serveru.
+Vyžaduje Node.js 22 nebo novější a Python 3. Pro celý průchod běží dvě služby. Statický server na portu 4589 zobrazuje web, kalkulačku a audity. Worker na portu 8799 obsluhuje poptávky a používá místní kopii D1.
+
+**1. Sestavte web, připravte schéma a spusťte statický server.**
 
 ```sh
 npm ci
@@ -35,7 +37,13 @@ npx wrangler d1 execute DB --local --file server/schema.sql
 python -m http.server 4589 --bind 127.0.0.1 --directory docs
 ```
 
-Ve druhém terminálu spusťte API pomocí `npx wrangler dev --local --ip 127.0.0.1 --port 8799`. Web poté otevřete na `http://127.0.0.1:4589/`. V dalším terminálu lze ověřit server a uživatelské průchody.
+**2. Ve druhém terminálu spusťte API.**
+
+```sh
+npx wrangler dev --local --ip 127.0.0.1 --port 8799
+```
+
+Otevřete [pracovní prostor](http://127.0.0.1:4589/). Pro ověření celého průchodu ponechte obě služby spuštěné a v dalším terminálu spusťte testy.
 
 ```sh
 npx playwright install chromium firefox webkit
