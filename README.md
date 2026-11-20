@@ -21,7 +21,7 @@ Pracovní prostor má platnost sedm dní a pojme 40 poptávek. Server přijímá
 
 `data/service.json` je zdrojem kalkulačky a HTML ceníku. `docs/archiv/` uchovává výchozí verzi s vadným odkazem. Stránky používají `noindex`, protože firma i kontakty jsou smyšlené.
 
-[Záznam GEO testu](docs/assets/geo-report.json) obsahuje vstupy, přesné odpovědi, parametry a identifikaci modelu. Test měří doložitelnost odpovědí nad dodanými pasážemi. Pro opakování slouží [skript pro llama.cpp](tools/replay_geo.py). [Mobilní měření](docs/assets/mobile-report.json) vzniklo v Lighthouse nad servisní stránkou. Nástroj `tools/mobile-report.mjs` převádí výstup Lighthouse do publikovaného přehledu.
+[Záznam GEO testu](docs/assets/geo-report.json) obsahuje vstupy, přesné odpovědi, parametry a identifikaci modelu. Test měří doložitelnost odpovědí nad dodanými pasážemi. Pro opakování slouží [skript pro llama.cpp](tools/replay_geo.py). [Mobilní měření](docs/assets/mobile-report.json) obsahuje tři laboratorní běhy Lighthouse nad veřejnou adresou servisní stránky a medián každé metriky. Přehled lze sestavit příkazem `node tools/mobile-report.mjs run1.json run2.json run3.json docs/assets/mobile-report.json`.
 
 ## Spuštění a testy
 

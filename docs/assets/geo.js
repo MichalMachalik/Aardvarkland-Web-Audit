@@ -77,10 +77,28 @@ export async function setupGeo() {
     for (const [side, info] of Object.entries(sides)) {
       const output = c[side],
         card = element('article', undefined, 'panel answer-card');
-      card.append(element('h2', info.title), element('p', output.answer));
+      const answer = element('p', output.answer);
+      card.append(element('h2', info.title), answer);
+      const claim = 'cena závisí na počtu jednotek';
+      const claimIndex = output.answer.indexOf(claim);
+      const missingPriceCitation =
+        c.id === 'cena' &&
+        side === 'before' &&
+        claimIndex >= 0 &&
+        !output.citations.includes('cena');
+      if (missingPriceCitation) {
+        answer.replaceChildren(
+          output.answer.slice(0, claimIndex),
+          element('mark', claim, 'uncited-claim'),
+          output.answer.slice(claimIndex + claim.length),
+        );
+        const note = element('p', 'Chybí citace k tvrzení o počtu jednotek. ', 'notice warn');
+        note.append(link('Ověřit v původním ceníku', info.folder + '/cenik/#cena'));
+        card.append(note);
+      }
       const links = element('div', undefined, 'source-links');
       const verifiedIds = new Set();
-      if (!output.citations.length && c.id !== 'vikend')
+      if (!output.citations.length && c.id !== 'vikend' && !missingPriceCitation)
         links.append(element('small', 'Odpověď neuvádí citaci.', 'meta'));
       for (const id of output.citations) {
         const passage = pages[side]
@@ -102,7 +120,7 @@ export async function setupGeo() {
         (p) => p.textContent,
       );
       verifyAnswer(card, c.id, side, output, catalog, verifiedIds, passages);
-      card.append(links);
+      if (links.childElementCount) card.append(links);
       grid.append(card);
     }
     one('#answers').replaceChildren(grid);

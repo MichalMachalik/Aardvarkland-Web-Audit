@@ -151,16 +151,45 @@ export function restoreSeo() {
 export async function loadPerformance() {
   const p = await resource('assets/mobile-report.json');
   const box = element('section', undefined, 'panel');
-  box.append(
-    element('h2', 'Mobilní měření'),
-    element('p', 'Lighthouse · servisní web · ' + p.date.slice(0, 10), 'meta'),
+  const title = element('h2', 'Mobilní měření');
+  title.id = 'performance-title';
+  const meta = element('p', 'Lighthouse ' + p.lighthouseVersion + ' · ', 'meta');
+  meta.append(
+    link('Veřejný servisní web', p.url),
+    ' · ' +
+      new Intl.DateTimeFormat('cs-CZ', { timeZone: 'Europe/Prague' }).format(new Date(p.date)),
   );
-  const stats = element('div', undefined, 'perf-row');
-  for (const [k, v] of Object.entries(p.metrics)) {
-    const s = element('span', k);
-    s.append(element('b', String(v)));
-    stats.append(s);
+  const table = element('table', undefined, 'performance-table');
+  table.setAttribute('aria-labelledby', title.id);
+  const header = table.createTHead().insertRow();
+  for (const text of ['Běh', 'Výkon', 'Přístupnost', 'LCP', 'CLS']) {
+    const th = element('th', text);
+    th.scope = 'col';
+    header.append(th);
   }
-  box.append(stats, link('Otevřít záznam měření', 'assets/mobile-report.json'));
+  function row(section, label, values) {
+    const tr = section.insertRow();
+    const th = element('th', label);
+    th.scope = 'row';
+    tr.append(th);
+    for (const text of values) tr.insertCell().textContent = text;
+  }
+  const body = table.createTBody();
+  p.runs.forEach((run, i) =>
+    row(body, String(i + 1), [
+      run.performance + '/100',
+      run.accessibility + '/100',
+      (run.largestContentfulPaintMs / 1000).toLocaleString('cs-CZ', { maximumFractionDigits: 2 }) +
+        ' s',
+      run.cumulativeLayoutShift.toLocaleString('cs-CZ', { maximumFractionDigits: 5 }),
+    ]),
+  );
+  row(table.createTFoot(), 'Medián', [
+    p.metrics.Výkon,
+    p.metrics.Přístupnost,
+    p.metrics.LCP,
+    p.metrics.CLS,
+  ]);
+  box.append(title, meta, table, link('Otevřít záznam měření', 'assets/mobile-report.json'));
   one('#perf').replaceChildren(box);
 }

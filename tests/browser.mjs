@@ -91,6 +91,29 @@ async function exercise(name, width) {
     await page.getByText('Převzato servisem', { exact: true }).waitFor();
     await other.close();
     await goto('seo');
+    const measurement = page.getByRole('table', { name: 'Mobilní měření' });
+    await measurement.waitFor();
+    const published = await (
+      await context.request.get(new URL('assets/mobile-report.json', base).href)
+    ).json();
+    assert.equal(published.runs.length, 3);
+    for (const [i, run] of published.runs.entries()) {
+      assert.deepEqual(
+        await measurement.locator('tbody tr').nth(i).locator('td').allTextContents(),
+        [
+          run.performance + '/100',
+          run.accessibility + '/100',
+          (run.largestContentfulPaintMs / 1000).toLocaleString('cs-CZ', {
+            maximumFractionDigits: 2,
+          }) + ' s',
+          run.cumulativeLayoutShift.toLocaleString('cs-CZ', { maximumFractionDigits: 5 }),
+        ],
+      );
+    }
+    assert.deepEqual(
+      await measurement.locator('tfoot td').allTextContents(),
+      Object.values(published.metrics),
+    );
     await click('#run-seo');
     await page.getByText('K opravě', { exact: true }).waitFor();
     assert.equal(await page.locator('.check').count(), 4);
@@ -116,6 +139,19 @@ async function exercise(name, width) {
       ['vikend', 0],
     ]) {
       await page.selectOption('#question', id);
+      const marked = page.locator('.answer-card mark');
+      assert.equal(await marked.count(), id === 'cena' ? 1 : 0);
+      if (id === 'cena') {
+        assert.equal(await marked.innerText(), 'cena závisí na počtu jednotek');
+        assert.match(
+          await text('.answer-card:first-child .notice'),
+          /Chybí citace k tvrzení o počtu jednotek/,
+        );
+        assert.equal(
+          await page.getByRole('link', { name: 'Ověřit v původním ceníku' }).getAttribute('href'),
+          'archiv/cenik/#cena',
+        );
+      }
       assert.equal(await page.locator('.answer-card').count(), 2);
       if (id === 'rozsah') {
         await page.locator('.source-links a').first().click();
